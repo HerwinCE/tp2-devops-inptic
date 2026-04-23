@@ -1,9 +1,7 @@
 from flask import Flask, Response, render_template_string, jsonify
 import time
 import os
-import random
 import platform
-import psutil
 from datetime import datetime
 
 app = Flask(__name__)
@@ -525,13 +523,13 @@ HTML_TEMPLATE = '''
 
 <script>
     let lastCount = {{ request_count }};
-    
+
     async function generateRequest() {
         await fetch('/');
         await refreshMetrics();
         animateButton('btn-primary');
     }
-    
+
     async function generateBatch(n) {
         for (let i = 0; i < n; i++) {
             await fetch('/');
@@ -540,14 +538,14 @@ HTML_TEMPLATE = '''
         await refreshMetrics();
         animateButton('btn-danger');
     }
-    
+
     async function refreshMetrics() {
         const response = await fetch('/metrics');
         const text = await response.text();
-        
+
         const countMatch = text.match(/http_requests_total (\d+)/);
         const uptimeMatch = text.match(/app_uptime_seconds (\d+)/);
-        
+
         if (countMatch) {
             const newCount = parseInt(countMatch[1]);
             const diff = newCount - lastCount;
@@ -563,13 +561,13 @@ HTML_TEMPLATE = '''
             document.getElementById('uptime').textContent = uptimeMatch[1];
         }
     }
-    
+
     function animateButton(className) {
         const btn = document.querySelector(`.${className}`);
         btn.style.transform = 'scale(0.95)';
         setTimeout(() => { btn.style.transform = ''; }, 200);
     }
-    
+
     // Création des particules
     function createParticles() {
         const container = document.getElementById('particles');
@@ -584,7 +582,7 @@ HTML_TEMPLATE = '''
             container.appendChild(particle);
         }
     }
-    
+
     setInterval(refreshMetrics, 5000);
     refreshMetrics();
     createParticles();
@@ -603,7 +601,7 @@ def get_server_info():
 @app.route('/')
 def home():
     server_info = get_server_info()
-    return render_template_string(HTML_TEMPLATE, 
+    return render_template_string(HTML_TEMPLATE,
                                   request_count=request_count,
                                   uptime=int(time.time() - start_time),
                                   server=f"{server_info['hostname']}")
@@ -618,9 +616,6 @@ http_requests_total {request_count}
 # HELP app_uptime_seconds Temps de fonctionnement de l'application
 # TYPE app_uptime_seconds gauge
 app_uptime_seconds {int(time.time() - start_time)}
-# HELP requests_per_minute Requêtes par minute
-# TYPE requests_per_minute gauge
-requests_per_minute 0
 """
     return Response(metrics_data, mimetype='text/plain')
 
